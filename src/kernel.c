@@ -2,6 +2,7 @@
 #include "vga.h"
 #include "keyboard.h"
 #include "printk.h"
+#include "stack.h"
 #include "string.h"
 
 #define FULL_BLOCK	'\xDB'	/* code page 437 character: a filled cell */
@@ -74,6 +75,8 @@ static void	setup_screens(void)
 		printk("Screen %u/%u", (uint32_t)(i + 1), (uint32_t)VGA_SCREENS);
 		vga_set_color(VGA_LIGHT_GREY, VGA_BLACK);
 		printk(" - F1..F%u to switch\n\n", (uint32_t)VGA_SCREENS);
+		if (i == 1)
+			stack_print();
 		print_prompt();
 		i++;
 	}

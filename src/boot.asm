@@ -29,7 +29,9 @@ stack_top:                       ; x86 stack grows downward: start from the top
 section .text
 global _start                    ; visible to the linker (ENTRY in linker.ld)
 extern kernel_main
-extern gdt_init               ; defined in kernel.c
+extern gdt_init
+global stack_bottom
+global stack_top               ; defined in kernel.c
 
 _start:
     mov esp, stack_top           ; ESP is undefined after GRUB: set our stack

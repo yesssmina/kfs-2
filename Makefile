@@ -31,7 +31,8 @@ C_SRCS		= kernel.c \
 			  string.c \
 			  keyboard.c \
 			  vga.c \
-			  gdt.c
+			  gdt.c \
+			  stack.c
 
 OBJS		= $(addprefix $(OBJ_DIR)/, $(ASM_SRCS:.asm=.o) $(C_SRCS:.c=.o))
 DEPS		= $(OBJS:.o=.d)
