@@ -28,10 +28,13 @@ stack_top:                       ; x86 stack grows downward: start from the top
 ; ---- Entry point ----
 section .text
 global _start                    ; visible to the linker (ENTRY in linker.ld)
-extern kernel_main               ; defined in kernel.c
+extern kernel_main
+extern gdt_init               ; defined in kernel.c
 
 _start:
     mov esp, stack_top           ; ESP is undefined after GRUB: set our stack
+    xor ebp, ebp            ; end of the frame chain for stack traces
+    call gdt_init            ; install our GDT before anything else
     call kernel_main             ; enter C code
 
     ; kernel_main should never return; if it does, halt the CPU forever

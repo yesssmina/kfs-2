@@ -25,12 +25,13 @@ LDFLAGS		= -m elf_i386 -z noexecstack -T linker.ld
 # BIOS modules only, no fonts/locales/themes, compressed: keeps the image small
 GRUBFLAGS	= -d $(GRUB_DIR) --fonts= --locales= --themes= --compress=xz
 
-ASM_SRCS	= boot.asm
+ASM_SRCS	= boot.asm gdt_flush.asm
 C_SRCS		= kernel.c \
 			  printk.c \
 			  string.c \
 			  keyboard.c \
-			  vga.c
+			  vga.c \
+			  gdt.c
 
 OBJS		= $(addprefix $(OBJ_DIR)/, $(ASM_SRCS:.asm=.o) $(C_SRCS:.c=.o))
 DEPS		= $(OBJS:.o=.d)
