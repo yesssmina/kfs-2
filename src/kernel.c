@@ -1,13 +1,12 @@
 /* kernel.c - main function of the kernel, called by boot.asm */
 #include "vga.h"
-#include "keyboard.h"
 #include "printk.h"
+#include "string.h"
 #include "stack.h"
 #include "gdt.h"
-#include "string.h"
+#include "shell.h"
 
 #define FULL_BLOCK	'\xDB'	/* code page 437 character: a filled cell */
-#define PROMPT		"> "
 
 /* Print one self-test line: green OK or red KO */
 static void	check(const char *name, int ok)
@@ -56,14 +55,7 @@ static void	color_demo(void)
 	vga_putchar('\n');
 }
 
-static void	print_prompt(void)
-{
-	vga_set_color(VGA_LIGHT_CYAN, VGA_BLACK);
-	vga_write(PROMPT);
-	vga_set_color(VGA_LIGHT_GREY, VGA_BLACK);
-}
-
-/* Bonus screens: give screens 2..4 a header and a prompt, then back to 1 */
+/* Screens 2..4: header, then kernel stack (F2) and GDT (F3), then a prompt */
 static void	setup_screens(void)
 {
 	size_t	i;
@@ -80,52 +72,10 @@ static void	setup_screens(void)
 			stack_print();
 		else if (i == 2)
 			gdt_print();
-		print_prompt();
+		shell_prompt();
 		i++;
 	}
 	vga_switch_screen(0);
-}
-
-/* Echo one typed character; Backspace never erases the prompt */
-static void	handle_char(char c, size_t *len)
-{
-	if (c == '\b')
-	{
-		if (*len > 0)
-		{
-			vga_putchar('\b');
-			(*len)--;
-		}
-	}
-	else if (c == '\n')
-	{
-		vga_putchar('\n');
-		print_prompt();
-		*len = 0;
-	}
-	else
-	{
-		vga_putchar(c);
-		(*len)++;
-	}
-}
-
-/* Bonus keyboard: F1..F4 switch screens, other keys are echoed */
-static void	echo_loop(void)
-{
-	size_t	len[VGA_SCREENS];
-	int		key;
-
-	memset(len, 0, sizeof(len));
-	print_prompt();
-	while (1)
-	{
-		key = keyboard_getkey();
-		if (key >= KEY_F1 && key < KEY_F1 + VGA_SCREENS)
-			vga_switch_screen((size_t)(key - KEY_F1));
-		else
-			handle_char((char)key, &len[vga_current_screen()]);
-	}
 }
 
 void	kernel_main(void)
@@ -140,7 +90,6 @@ void	kernel_main(void)
 	color_demo();
 	printk("printk: %s | %d | %u | %x | %p | %c | %08x | %%\n",
 		"str", -42, 42, 0xbeef, (void *)VGA_MEMORY, 'K', 42);
-	vga_write("\nType on the keyboard (Enter: new line, Backspace: erase,"
-		" F1..F4: screens)\n");
-	echo_loop();
+	vga_write("\nType 'help' for the command list (F1..F4: switch screens)\n");
+	shell_run();
 }
