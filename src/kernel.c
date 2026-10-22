@@ -3,6 +3,7 @@
 #include "keyboard.h"
 #include "printk.h"
 #include "stack.h"
+#include "gdt.h"
 #include "string.h"
 
 #define FULL_BLOCK	'\xDB'	/* code page 437 character: a filled cell */
@@ -77,6 +78,8 @@ static void	setup_screens(void)
 		printk(" - F1..F%u to switch\n\n", (uint32_t)VGA_SCREENS);
 		if (i == 1)
 			stack_print();
+		else if (i == 2)
+			gdt_print();
 		print_prompt();
 		i++;
 	}
